@@ -1,45 +1,375 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
+
 <head>
-  <title>Khang Game</title>
-  <style>
-    body{
-      background:#1e1e1e;
-      color:white;
-      font-family:sans-serif;
-      text-align:center;
-      padding-top:80px;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>T1 Town</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#0f1117;
+    color:white;
+    font-family:sans-serif;
+    overflow-x:hidden;
+}
+
+/* BACKGROUND */
+
+.bg{
+    position:fixed;
+    width:100%;
+    height:100%;
+    z-index:-1;
+
+    background:
+    radial-gradient(circle at top,#23304f,#0f1117 60%);
+}
+
+/* HEADER */
+
+header{
+    padding:80px 20px;
+    text-align:center;
+}
+
+/* LOGO */
+
+.logo{
+    font-size:70px;
+    font-weight:900;
+
+    background:linear-gradient(90deg,#7cf3ff,#6f7dff);
+
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+
+    animation:glow 3s infinite;
+}
+
+@keyframes glow{
+
+    0%{
+        filter:drop-shadow(0 0 5px #6f7dff);
     }
 
-    .btn{
-      display:inline-block;
-      padding:15px 30px;
-      background:#4CAF50;
-      color:white;
-      text-decoration:none;
-      border-radius:10px;
-      font-size:20px;
+    50%{
+        filter:drop-shadow(0 0 20px #7cf3ff);
     }
 
-    img{
-      width:300px;
-      border-radius:15px;
+    100%{
+        filter:drop-shadow(0 0 5px #6f7dff);
     }
-  </style>
+
+}
+
+.studio{
+    margin-top:10px;
+    opacity:0.8;
+    font-size:18px;
+}
+
+/* HERO */
+
+.hero{
+    margin-top:50px;
+}
+
+.hero img{
+    width:90%;
+    max-width:1100px;
+
+    border-radius:30px;
+
+    box-shadow:
+    0 0 40px rgba(0,0,0,0.6);
+
+    animation:float 4s ease-in-out infinite;
+}
+
+@keyframes float{
+
+    0%{
+        transform:translateY(0px);
+    }
+
+    50%{
+        transform:translateY(-10px);
+    }
+
+    100%{
+        transform:translateY(0px);
+    }
+
+}
+
+/* BUTTON */
+
+.download-btn{
+
+    display:inline-block;
+
+    margin-top:40px;
+
+    padding:18px 50px;
+
+    border-radius:20px;
+
+    text-decoration:none;
+
+    color:white;
+
+    font-size:22px;
+    font-weight:bold;
+
+    background:
+    linear-gradient(90deg,#5ce1ff,#5865ff);
+
+    transition:0.3s;
+
+    box-shadow:
+    0 0 20px rgba(92,225,255,0.4);
+
+}
+
+.download-btn:hover{
+
+    transform:
+    scale(1.07);
+
+    box-shadow:
+    0 0 40px rgba(92,225,255,0.8);
+
+}
+
+/* INFO */
+
+.section{
+    padding:80px 20px;
+    text-align:center;
+}
+
+.section-title{
+
+    font-size:40px;
+    margin-bottom:40px;
+
+}
+
+/* CARD */
+
+.cards{
+
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:25px;
+
+}
+
+.card{
+
+    width:300px;
+
+    background:#1b2030;
+
+    border-radius:25px;
+
+    overflow:hidden;
+
+    transition:0.3s;
+
+    border:
+    1px solid rgba(255,255,255,0.05);
+
+}
+
+.card:hover{
+
+    transform:
+    translateY(-10px);
+
+}
+
+.card img{
+
+    width:100%;
+    height:200px;
+    object-fit:cover;
+
+}
+
+.card h3{
+
+    padding:20px 20px 10px;
+
+}
+
+.card p{
+
+    padding:0 20px 25px;
+
+    opacity:0.75;
+    font-size:15px;
+
+}
+
+/* FOOTER */
+
+footer{
+
+    padding:40px;
+    text-align:center;
+
+    opacity:0.5;
+
+}
+
+/* PARTICLES */
+
+.particle{
+
+    position:fixed;
+
+    width:6px;
+    height:6px;
+
+    background:#7cf3ff;
+
+    border-radius:50%;
+
+    opacity:0.3;
+
+    animation:particleAnim linear infinite;
+
+}
+
+@keyframes particleAnim{
+
+    from{
+        transform:translateY(100vh);
+    }
+
+    to{
+        transform:translateY(-100px);
+    }
+
+}
+
+</style>
+
 </head>
 
 <body>
 
-  <h1>Khang Game</h1>
+<div class="bg"></div>
 
-  <img src="https://picsum.photos/500/300">
+<header>
 
-  <p>Game pixel online miễn phí</p>
+<h1 class="logo">T1 Town</h1>
 
-  <a class="btn"
-     href="LINK_APK">
-     Tải Game
-  </a>
+<p class="studio">
+T1MGame Studio
+</p>
+
+<div class="hero">
+
+<img src="https://picsum.photos/1400/700">
+
+</div>
+
+<a class="download-btn"
+href="LINK_APK">
+TẢI GAME
+</a>
+
+</header>
+
+<section class="section">
+
+<h2 class="section-title">
+Thế Giới Pixel MMO
+</h2>
+
+<div class="cards">
+
+<div class="card">
+
+<img src="https://picsum.photos/500/300?1">
+
+<h3>Pixel Modern</h3>
+
+<p>
+Phong cách pixel hiện đại lấy cảm hứng từ Pony Town.
+</p>
+
+</div>
+
+<div class="card">
+
+<img src="https://picsum.photos/500/300?2">
+
+<h3>Online World</h3>
+
+<p>
+Khám phá thế giới online rộng lớn cùng người chơi khác.
+</p>
+
+</div>
+
+<div class="card">
+
+<img src="https://picsum.photos/500/300?3">
+
+<h3>Animation Smooth</h3>
+
+<p>
+Hiệu ứng và animation siêu mượt chuẩn MMO hiện đại.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+<footer>
+
+© 2026 T1MGame Studio
+
+</footer>
+
+<script>
+
+/* PARTICLES */
+
+for(let i=0;i<50;i++){
+
+    let p=document.createElement("div");
+
+    p.className="particle";
+
+    p.style.left=Math.random()*100+"vw";
+
+    p.style.animationDuration=
+    5+Math.random()*10+"s";
+
+    p.style.opacity=
+    Math.random();
+
+    document.body.appendChild(p);
+
+}
+
+</script>
 
 </body>
 </html>
