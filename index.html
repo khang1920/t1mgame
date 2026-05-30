@@ -3,915 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>T1 Town • Pixel MMO | T1MGame Studio</title>
-    <meta name="description" content="T1 Town - Thế giới Pixel MMO đột phá từ T1MGame. Khám phá, chiến đấu, xây dựng cùng cộng đồng game thủ toàn cầu.">
-    <meta property="og:title" content="T1 Town - Pixel MMO">
-    <meta property="og:description" content="Game Pixel MMO thế hệ mới | T1MGame Studio">
-    <meta property="og:type" content="website">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@300;400;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-deep: #0a0a14;
-            --bg-card: #111827;
-            --border-glow: #6366f1;
-            --accent-primary: #a855f7;
-            --accent-secondary: #06b6d4;
-            --gold: #f59e0b;
-            --gold-bright: #fbbf24;
-            --danger: #ef4444;
-            --text-primary: #f1f5f9;
-            --text-secondary: #cbd5e1;
-            --text-muted: #94a3b8;
-            --pixel-size: 4px;
-            --grid-color: rgba(99, 102, 241, 0.08);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: var(--bg-deep);
-            font-family: 'Inter', 'Space Grotesk', sans-serif;
-            color: var(--text-primary);
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-            cursor: default;
-        }
-
-        /* === PIXEL GRID BACKGROUND (Godot style) === */
-        .pixel-grid-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            background-image: 
-                linear-gradient(var(--grid-color) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-            background-size: 32px 32px;
-            animation: gridPulse 8s ease-in-out infinite;
-        }
-
-        @keyframes gridPulse {
-            0%,
-            100% {
-                background-size: 32px 32px;
-                opacity: 0.6;
-            }
-            50% {
-                background-size: 34px 34px;
-                opacity: 1;
-            }
-        }
-
-        /* === FLOATING PIXEL PARTICLES === */
-        .particles-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .pixel-particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: var(--accent-primary);
-            box-shadow: 0 0 8px var(--accent-primary), 0 0 20px var(--accent-primary), 0 0 40px var(--border-glow);
-            animation: floatUp linear infinite;
-            image-rendering: pixelated;
-        }
-
-        @keyframes floatUp {
-            0% {
-                transform: translateY(0) translateX(0) rotate(0deg) scale(1);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 0.8;
-            }
-            100% {
-                transform: translateY(-110vh) translateX(60px) rotate(360deg) scale(0.3);
-                opacity: 0;
-            }
-        }
-
-        /* === SCANLINE EFFECT === */
-        .scanlines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 9999;
-            background: repeating-linear-gradient(0deg,
-                    transparent,
-                    transparent 2px,
-                    rgba(0, 0, 0, 0.03) 2px,
-                    rgba(0, 0, 0, 0.03) 4px);
-            opacity: 0.5;
-        }
-
-        /* === MAIN CONTAINER === */
-        .main-container {
-            position: relative;
-            z-index: 1;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* === HEADER === */
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 30px;
-            background: rgba(17, 24, 39, 0.85);
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(99, 102, 241, 0.3);
-            border-radius: 16px;
-            margin-bottom: 30px;
-            position: relative;
-            overflow: hidden;
-            flex-wrap: wrap;
-            gap: 15px;
-            animation: slideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes slideDown {
-            from {
-                transform: translateY(-30px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(from 0deg, transparent, rgba(99, 102, 241, 0.1), transparent, rgba(168, 85, 247, 0.1), transparent);
-            animation: rotateBorder 6s linear infinite;
-            z-index: -1;
-        }
-
-        @keyframes rotateBorder {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .pixel-logo {
-            width: 60px;
-            height: 60px;
-            background: var(--bg-card);
-            border: 3px solid var(--accent-primary);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 28px;
-            color: var(--accent-primary);
-            box-shadow: 0 0 20px rgba(168, 85, 247, 0.5), inset 0 0 15px rgba(168, 85, 247, 0.2);
-            animation: logoGlow 2s ease-in-out infinite;
-            image-rendering: pixelated;
-        }
-
-        @keyframes logoGlow {
-            0%,
-            100% {
-                box-shadow: 0 0 20px rgba(168, 85, 247, 0.5), inset 0 0 15px rgba(168, 85, 247, 0.2);
-            }
-            50% {
-                box-shadow: 0 0 40px rgba(168, 85, 247, 0.9), 0 0 60px rgba(99, 102, 241, 0.6), inset 0 0 25px rgba(168, 85, 247, 0.5);
-            }
-        }
-
-        .game-title {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 2rem;
-            background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 40%, #d97706 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.5));
-            line-height: 1.2;
-            animation: titleShine 3s ease-in-out infinite;
-        }
-
-        @keyframes titleShine {
-            0%,
-            100% {
-                filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.5));
-            }
-            50% {
-                filter: drop-shadow(0 0 35px rgba(245, 158, 11, 0.9)) drop-shadow(0 0 60px rgba(251, 191, 36, 0.5));
-            }
-        }
-
-        .studio-badge {
-            background: rgba(99, 102, 241, 0.2);
-            border: 2px solid var(--border-glow);
-            padding: 8px 16px;
-            border-radius: 30px;
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-            font-size: 0.85rem;
-            color: var(--accent-primary);
-            letter-spacing: 1px;
-            animation: badgePulse 2s ease-in-out infinite;
-        }
-
-        @keyframes badgePulse {
-            0%,
-            100% {
-                border-color: var(--border-glow);
-                box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
-            }
-            50% {
-                border-color: var(--accent-primary);
-                box-shadow: 0 0 25px rgba(168, 85, 247, 0.6);
-            }
-        }
-
-        .version-tag {
-            background: #1e293b;
-            border: 1px solid var(--accent-secondary);
-            color: var(--accent-secondary);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.65rem;
-        }
-
-        /* === HERO SECTION === */
-        .hero {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        @media (max-width: 768px) {
-            .hero {
-                grid-template-columns: 1fr;
-            }
-            .game-title {
-                font-size: 1.3rem;
-            }
-        }
-
-        .hero-image-container {
-            background: var(--bg-card);
-            border: 3px solid rgba(99, 102, 241, 0.4);
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-            min-height: 350px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        }
-
-        .hero-image-container::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: 
-                radial-gradient(circle at 50% 50%, transparent 40%, rgba(10, 10, 20, 0.6) 100%),
-                linear-gradient(0deg, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
-            pointer-events: none;
-        }
-
-        .hero-pixel-art {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: 
-                linear-gradient(45deg, #1a1a3e 25%, transparent 25%),
-                linear-gradient(-45deg, #1a1a3e 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #1a1a3e 75%),
-                linear-gradient(-45deg, transparent 75%, #1a1a3e 75%);
-            background-size: 20px 20px;
-            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-            animation: bgScroll 20s linear infinite;
-        }
-
-        @keyframes bgScroll {
-            to {
-                background-position: 20px 0, 20px 10px, 30px -10px, -10px 0px;
-            }
-        }
-
-        .pixel-character {
-            font-size: 120px;
-            animation: charFloat 3s ease-in-out infinite;
-            filter: drop-shadow(0 20px 40px rgba(168, 85, 247, 0.6));
-            image-rendering: pixelated;
-        }
-
-        @keyframes charFloat {
-            0%,
-            100% {
-                transform: translateY(0px);
-            }
-            50% {
-                transform: translateY(-20px);
-            }
-        }
-
-        .hero-info {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .hero-description {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            line-height: 1.8;
-            background: rgba(17, 24, 39, 0.8);
-            padding: 20px;
-            border-radius: 16px;
-            border-left: 4px solid var(--accent-primary);
-        }
-
-        .download-buttons {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 14px 28px;
-            border: none;
-            border-radius: 12px;
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            overflow: hidden;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #6366f1, #a855f7);
-            color: white;
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.6);
-        }
-
-        .btn-secondary {
-            background: rgba(30, 41, 59, 0.9);
-            color: var(--text-primary);
-            border: 2px solid rgba(99, 102, 241, 0.5);
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--accent-primary);
-            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.3);
-        }
-
-        .btn::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .btn:active::after {
-            width: 300px;
-            height: 300px;
-        }
-
-        /* === FEATURES GRID === */
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .feature-card {
-            background: rgba(17, 24, 39, 0.8);
-            border: 2px solid rgba(99, 102, 241, 0.25);
-            border-radius: 20px;
-            padding: 30px;
-            text-align: center;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            animation: cardAppear 0.6s ease-out forwards;
-            opacity: 0;
-        }
-
-        .feature-card:nth-child(1) {
-            animation-delay: 0.1s;
-        }
-        .feature-card:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-        .feature-card:nth-child(3) {
-            animation-delay: 0.3s;
-        }
-
-        @keyframes cardAppear {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--accent-primary);
-            box-shadow: 0 20px 50px rgba(99, 102, 241, 0.3), 0 0 0 4px rgba(99, 102, 241, 0.1);
-        }
-
-        .feature-icon {
-            font-size: 60px;
-            margin-bottom: 15px;
-            display: block;
-            animation: iconBounce 2s ease-in-out infinite;
-            image-rendering: pixelated;
-        }
-
-        .feature-card:nth-child(2) .feature-icon {
-            animation-delay: 0.3s;
-        }
-        .feature-card:nth-child(3) .feature-icon {
-            animation-delay: 0.6s;
-        }
-
-        @keyframes iconBounce {
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-12px);
-            }
-        }
-
-        .feature-card h3 {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.8rem;
-            color: var(--gold-bright);
-            margin-bottom: 10px;
-        }
-
-        .feature-card p {
-            color: var(--text-muted);
-            line-height: 1.6;
-            font-size: 0.95rem;
-        }
-
-        /* === SOCIAL LINKS === */
-        .social-section {
-            background: rgba(17, 24, 39, 0.85);
-            border: 2px solid rgba(99, 102, 241, 0.3);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            backdrop-filter: blur(15px);
-        }
-
-        .social-section h2 {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.9rem;
-            color: var(--accent-primary);
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .social-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-        }
-
-        .social-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px 20px;
-            border-radius: 14px;
-            text-decoration: none;
-            color: var(--text-primary);
-            font-weight: 600;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            font-family: 'Space Grotesk', sans-serif;
-        }
-
-        .social-link.discord {
-            background: rgba(88, 101, 242, 0.2);
-            border: 2px solid #5865F2;
-        }
-        .social-link.discord:hover {
-            background: rgba(88, 101, 242, 0.4);
-            box-shadow: 0 0 30px rgba(88, 101, 242, 0.5);
-            transform: translateY(-3px);
-        }
-
-        .social-link.facebook {
-            background: rgba(24, 119, 242, 0.2);
-            border: 2px solid #1877F2;
-        }
-        .social-link.facebook:hover {
-            background: rgba(24, 119, 242, 0.4);
-            box-shadow: 0 0 30px rgba(24, 119, 242, 0.5);
-            transform: translateY(-3px);
-        }
-
-        .social-link.tiktok {
-            background: rgba(255, 0, 80, 0.2);
-            border: 2px solid #ff0050;
-        }
-        .social-link.tiktok:hover {
-            background: rgba(255, 0, 80, 0.4);
-            box-shadow: 0 0 30px rgba(255, 0, 80, 0.5);
-            transform: translateY(-3px);
-        }
-
-        .social-link.github {
-            background: rgba(110, 84, 148, 0.2);
-            border: 2px solid #6e5494;
-        }
-        .social-link.github:hover {
-            background: rgba(110, 84, 148, 0.4);
-            box-shadow: 0 0 30px rgba(110, 84, 148, 0.5);
-            transform: translateY(-3px);
-        }
-
-        .social-icon {
-            font-size: 28px;
-            flex-shrink: 0;
-        }
-
-        /* === MARQUEE === */
-        .marquee-container {
-            background: rgba(17, 24, 39, 0.8);
-            border: 2px solid rgba(99, 102, 241, 0.3);
-            border-radius: 30px;
-            padding: 14px 0;
-            margin-bottom: 30px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .marquee-content {
-            display: flex;
-            animation: marquee 25s linear infinite;
-            white-space: nowrap;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.6rem;
-            color: var(--accent-primary);
-            letter-spacing: 2px;
-        }
-
-        @keyframes marquee {
-            0% {
-                transform: translateX(0);
-            }
-            100% {
-                transform: translateX(-50%);
-            }
-        }
-
-        .marquee-content span {
-            padding: 0 30px;
-            display: inline-block;
-        }
-
-        /* === FOOTER === */
-        .footer {
-            text-align: center;
-            padding: 20px;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            border-top: 1px solid rgba(99, 102, 241, 0.2);
-        }
-
-        /* === CUSTOM CURSOR === */
-        .custom-cursor {
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--accent-primary);
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            z-index: 10000;
-            transition: transform 0.1s ease;
-            mix-blend-mode: difference;
-            animation: cursorPulse 2s infinite;
-        }
-
-        @keyframes cursorPulse {
-            0%,
-            100% {
-                box-shadow: 0 0 10px var(--accent-primary);
-            }
-            50% {
-                box-shadow: 0 0 25px var(--accent-primary), 0 0 40px var(--border-glow);
-            }
-        }
-
-        /* === RESPONSIVE === */
-        @media (max-width: 768px) {
-            .header {
-                padding: 15px;
-            }
-            .game-title {
-                font-size: 1.2rem;
-            }
-            .hero-image-container {
-                min-height: 250px;
-            }
-            .pixel-character {
-                font-size: 80px;
-            }
-            .btn {
-                padding: 12px 20px;
-                font-size: 0.9rem;
-            }
-            .features {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <title>🌍 Thế Giới Mô Phỏng 2D - Ý Thức Nhân Tạo</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="Thế giới mô phỏng 2D với sinh vật có ý thức, trí nhớ và khả năng học hỏi">
 </head>
 <body>
-
-    <!-- Background Grid -->
-    <div class="pixel-grid-bg"></div>
-
-    <!-- Floating Particles -->
-    <div class="particles-container" id="particles"></div>
-
-    <!-- Scanlines -->
-    <div class="scanlines"></div>
-
-    <!-- Custom Cursor -->
-    <div class="custom-cursor" id="cursor"></div>
-
-    <!-- Main Container -->
-    <div class="main-container">
-
+    <div id="app">
         <!-- Header -->
-        <header class="header">
-            <div class="logo-section">
-                <div class="pixel-logo">⬡</div>
-                <div>
-                    <h1 class="game-title">T1 Town</h1>
-                    <span class="studio-badge">T1MGAME STUDIO</span>
-                </div>
-            </div>
-            <span class="version-tag">BETA v2.0</span>
+        <header>
+            <h1>🌍 THẾ GIỚI MÔ PHỎNG 2D</h1>
+            <p class="subtitle">Sinh vật có ý thức • Trí nhớ • Học hỏi • Tiến hóa</p>
         </header>
 
-        <!-- Hero Section -->
-        <section class="hero">
-            <div class="hero-image-container">
-                <div class="hero-pixel-art">
-                    <span class="pixel-character">🏰</span>
+        <!-- Main Container -->
+        <div class="main-container">
+            <!-- Canvas World -->
+            <div class="world-container">
+                <canvas id="worldCanvas"></canvas>
+                <div class="world-overlay" id="loadingScreen">
+                    <div class="loader"></div>
+                    <p>Đang tạo thế giới...</p>
+                </div>
+                <div class="mini-map" id="miniMap">
+                    <canvas id="miniMapCanvas"></canvas>
                 </div>
             </div>
-            <div class="hero-info">
-                <div class="hero-description">
-                    <strong style="color: var(--gold-bright);">🌍 Thế Giới Pixel MMO Đột Phá</strong><br><br>
-                    ✨ Đồ họa Pixel Art hiện đại, lấy cảm hứng từ các engine game hàng đầu như Godot<br>
-                    ⚔️ Hệ thống chiến đấu, xây dựng, khám phá thế giới mở<br>
-                    🎮 Tối ưu mượt mà, animation 60fps chuẩn game chuyên nghiệp
+
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <!-- World Stats -->
+                <div class="panel-section">
+                    <h2>📊 THỐNG KÊ THẾ GIỚI</h2>
+                    <div class="stats-grid">
+                        <div class="stat">
+                            <span class="stat-icon">🕒</span>
+                            <div>
+                                <div class="stat-label">Ngày</div>
+                                <div class="stat-value" id="dayCount">1</div>
+                            </div>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-icon">🌡️</span>
+                            <div>
+                                <div class="stat-label">Mùa</div>
+                                <div class="stat-value" id="seasonDisplay">Xuân</div>
+                            </div>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-icon">🐾</span>
+                            <div>
+                                <div class="stat-label">Sinh vật</div>
+                                <div class="stat-value" id="animalCount">0</div>
+                            </div>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-icon">🌳</span>
+                            <div>
+                                <div class="stat-label">Thực vật</div>
+                                <div class="stat-value" id="plantCount">0</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="download-buttons">
-                    <button class="btn btn-primary" onclick="alert('🚀 T1 Town Launcher sẽ ra mắt! Theo dõi T1MGame để cập nhật.')">
-                        ⚡ TẢI GAME PC
-                    </button>
-                    <button class="btn btn-secondary" onclick="alert('📱 Phiên bản Mobile đang phát triển!')">
-                        📱 ANDROID / iOS
-                    </button>
+
+                <!-- Time Controls -->
+                <div class="panel-section">
+                    <h2>⏱️ ĐIỀU KHIỂN THỜI GIAN</h2>
+                    <div class="time-controls">
+                        <button onclick="world.setTimeSpeed(0)" id="btnPause">⏸️</button>
+                        <button onclick="world.setTimeSpeed(1)" id="btnNormal">▶️ 1x</button>
+                        <button onclick="world.setTimeSpeed(2)" id="btnFast">⏩ 2x</button>
+                        <button onclick="world.setTimeSpeed(5)" id="btnUltra">⚡ 5x</button>
+                    </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- Features -->
-        <section class="features">
-            <div class="feature-card">
-                <span class="feature-icon">🎨</span>
-                <h3>Pixel Art Hiện Đại</h3>
-                <p>Đồ họa pixel art đỉnh cao, lấy cảm hứng từ các engine như Godot, mang đến trải nghiệm thị giác độc đáo.</p>
-            </div>
-            <div class="feature-card">
-                <span class="feature-icon">🌐</span>
-                <h3>Thế Giới MMO</h3>
-                <p>Kết nối hàng ngàn game thủ, xây dựng đế chế, chiến đấu và khám phá vùng đất T1 Town rộng lớn.</p>
-            </div>
-            <div class="feature-card">
-                <span class="feature-icon">⚡</span>
-                <h3>Animation Siêu Mượt</h3>
-                <p>Công nghệ animation 60fps, hiệu ứng đột phá vượt trội so với mọi game pixel truyền thống.</p>
-            </div>
-        </section>
+                <!-- Selected Animal Info -->
+                <div class="panel-section" id="animalInfo" style="display:none;">
+                    <h2>🧬 SINH VẬT ĐƯỢC CHỌN</h2>
+                    <div id="selectedAnimalDetails"></div>
+                </div>
 
-        <!-- Social Links -->
-        <section class="social-section">
-            <h2>📡 KẾT NỐI VỚI T1MGAME</h2>
-            <div class="social-grid">
-                <a href="https://discord.gg/t1mgame" target="_blank" class="social-link discord">
-                    <span class="social-icon">💬</span>
-                    <div>
-                        <strong>Discord</strong>
-                        <small style="display:block;color:#94a3b8;">Tham gia cộng đồng</small>
+                <!-- Animal List -->
+                <div class="panel-section">
+                    <h2>🐾 DANH SÁCH SINH VẬT</h2>
+                    <div class="search-box">
+                        <input type="text" id="searchAnimal" placeholder="🔍 Tìm sinh vật..." oninput="filterAnimals()">
                     </div>
-                </a>
-                <a href="https://facebook.com/t1mgame" target="_blank" class="social-link facebook">
-                    <span class="social-icon">📘</span>
-                    <div>
-                        <strong>Facebook</strong>
-                        <small style="display:block;color:#94a3b8;">Theo dõi fanpage</small>
-                    </div>
-                </a>
-                <a href="https://tiktok.com/@t1mgame" target="_blank" class="social-link tiktok">
-                    <span class="social-icon">🎵</span>
-                    <div>
-                        <strong>TikTok</strong>
-                        <small style="display:block;color:#94a3b8;">Video độc quyền</small>
-                    </div>
-                </a>
-                <a href="https://github.com/khang1920" target="_blank" class="social-link github">
-                    <span class="social-icon">🐙</span>
-                    <div>
-                        <strong>GitHub</strong>
-                        <small style="display:block;color:#94a3b8;">Mã nguồn mở</small>
-                    </div>
-                </a>
-            </div>
-        </section>
+                    <div class="animal-list" id="animalList"></div>
+                </div>
 
-        <!-- Marquee -->
-        <div class="marquee-container">
-            <div class="marquee-content">
-                <span>⚔️ T1 TOWN</span><span>•</span><span>PIXEL MMO</span><span>•</span>
-                <span>T1MGAME</span><span>•</span><span>GODOT ENGINE</span><span>•</span>
-                <span>60 FPS</span><span>•</span><span>OPEN WORLD</span><span>•</span>
-                <span>⚔️ T1 TOWN</span><span>•</span><span>PIXEL MMO</span><span>•</span>
-                <span>T1MGAME</span><span>•</span><span>GODOT ENGINE</span><span>•</span>
-                <span>60 FPS</span><span>•</span><span>OPEN WORLD</span><span>•</span>
+                <!-- World Events Log -->
+                <div class="panel-section">
+                    <h2>📜 NHẬT KÝ THẾ GIỚI</h2>
+                    <div class="event-log" id="eventLog">
+                        <p>🌍 Thế giới đang được khởi tạo...</p>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="panel-section">
+                    <h2>🎮 ĐIỀU KHIỂN</h2>
+                    <div class="action-buttons">
+                        <button onclick="world.addAnimal()" class="btn-primary">➕ Thêm Sinh Vật</button>
+                        <button onclick="world.addResourceBurst()" class="btn-success">🌱 Thêm Tài Nguyên</button>
+                        <button onclick="world.toggleDisaster()" class="btn-danger">🌪️ Thảm Họa</button>
+                        <button onclick="world.reset()" class="btn-warning">🔄 Reset</button>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <p>© 2025 <strong>T1MGame Studio</strong> • T1 Town Pixel MMO • All Rights Reserved</p>
-            <p style="margin-top:8px;">Made with ❤️ and Pixel Art</p>
-        </footer>
     </div>
 
-    <script>
-        // === FLOATING PARTICLES GENERATOR ===
-        const particlesContainer = document.getElementById('particles');
-        const colors = ['#6366f1', '#a855f7', '#06b6d4', '#f59e0b', '#ef4444', '#10b981'];
-
-        function createParticle() {
-            const particle = document.createElement('div');
-            particle.classList.add('pixel-particle');
-            const size = Math.random() * 6 + 2;
-            particle.style.width = size + 'px';
-            particle.style.height = size + 'px';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.top = '110vh';
-            particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-            particle.style.boxShadow = `0 0 ${size * 3}px ${particle.style.background}`;
-            particle.style.animationDuration = Math.random() * 12 + 8 + 's';
-            particlesContainer.appendChild(particle);
-
-            setTimeout(() => {
-                particle.remove();
-            }, 20000);
-        }
-
-        setInterval(createParticle, 300);
-        for (let i = 0; i < 30; i++) {
-            setTimeout(createParticle, i * 200);
-        }
-
-        // === CUSTOM CURSOR ===
-        const cursor = document.getElementById('cursor');
-        document.addEventListener('mousemove', (e) => {
-            cursor.style.left = e.clientX - 10 + 'px';
-            cursor.style.top = e.clientY - 10 + 'px';
-        });
-
-        document.addEventListener('mousedown', () => {
-            cursor.style.transform = 'scale(1.5)';
-        });
-        document.addEventListener('mouseup', () => {
-            cursor.style.transform = 'scale(1)';
-        });
-
-        // === CLICK RIPPLE EFFECT ===
-        document.addEventListener('click', function(e) {
-            const ripple = document.createElement('div');
-            ripple.style.cssText = `
-                position: fixed;
-                left: ${e.clientX - 25}px;
-                top: ${e.clientY - 25}px;
-                width: 50px;
-                height: 50px;
-                border-radius: 50%;
-                border: 2px solid #a855f7;
-                pointer-events: none;
-                z-index: 9998;
-                animation: rippleOut 0.8s ease-out forwards;
-            `;
-            document.body.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 800);
-        });
-
-        // Add ripple animation
-        const rippleStyle = document.createElement('style');
-        rippleStyle.textContent = `
-            @keyframes rippleOut {
-                to {
-                    transform: scale(4);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(rippleStyle);
-
-        // === PARALLAX EFFECT ON MOUSE MOVE ===
-        document.addEventListener('mousemove', function(e) {
-            const cards = document.querySelectorAll('.feature-card');
-            const x = (e.clientX / window.innerWidth - 0.5) * 20;
-            const y = (e.clientY / window.innerHeight - 0.5) * 20;
-
-            cards.forEach((card, index) => {
-                const factor = (index + 1) * 0.5;
-                card.style.transform = `translate(${x * factor}px, ${y * factor}px)`;
-            });
-        });
-
-        console.log('%c🏰 T1 Town %cby T1MGame Studio',
-            'font-size:24px; color:#fbbf24; font-family:monospace;',
-            'color:#a855f7;');
-        console.log('%c⚡ Pixel MMO thế hệ mới đã sẵn sàng!', 'color:#06b6d4;');
-    </script>
+    <script src="js/memory.js"></script>
+    <script src="js/learning.js"></script>
+    <script src="js/animal.js"></script>
+    <script src="js/resources.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/world.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
