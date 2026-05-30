@@ -4,122 +4,1012 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌍 Thế Giới Mô Phỏng 2D - Ý Thức Nhân Tạo</title>
-    <link rel="stylesheet" href="styles.css">
-    <meta name="description" content="Thế giới mô phỏng 2D với sinh vật có ý thức, trí nhớ và khả năng học hỏi">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            height: 100vh;
+            color: #00ff88;
+        }
+
+        canvas {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        #ui {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 15px;
+            width: 300px;
+            max-height: 90vh;
+            overflow-y: auto;
+            font-size: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        #ui h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #00ff88;
+            padding-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .stat-label {
+            color: #88ccaa;
+        }
+        .stat-value {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        button {
+            width: 100%;
+            padding: 8px;
+            margin: 3px 0;
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: rgba(0, 255, 136, 0.4);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+
+        button.danger {
+            border-color: #ff4444;
+            color: #ff4444;
+            background: rgba(255, 68, 68, 0.1);
+        }
+
+        button.danger:hover {
+            background: rgba(255, 68, 68, 0.3);
+        }
+
+        #animalList {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+
+        .animal-card {
+            background: rgba(0, 255, 136, 0.05);
+            padding: 6px;
+            margin: 4px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11px;
+            border: 1px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .animal-card:hover {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.15);
+        }
+
+        .animal-card.selected {
+            border-color: #ffcc00;
+            background: rgba(255, 204, 0, 0.2);
+        }
+
+        .bar {
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin: 2px 0;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+        .bar-hp {
+            background: #ff4444;
+        }
+        .bar-hunger {
+            background: #ff8800;
+        }
+        .bar-thirst {
+            background: #4488ff;
+        }
+
+        #log {
+            max-height: 120px;
+            overflow-y: auto;
+            font-size: 10px;
+            color: #88ccaa;
+            margin-top: 10px;
+            padding: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+
+        #log div {
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #00ff88;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 600px) {
+            #ui {
+                width: 250px;
+                font-size: 10px;
+                padding: 10px;
+                right: 5px;
+                top: 5px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div id="app">
-        <!-- Header -->
-        <header>
-            <h1>🌍 THẾ GIỚI MÔ PHỎNG 2D</h1>
-            <p class="subtitle">Sinh vật có ý thức • Trí nhớ • Học hỏi • Tiến hóa</p>
-        </header>
+    <canvas id="world"></canvas>
 
-        <!-- Main Container -->
-        <div class="main-container">
-            <!-- Canvas World -->
-            <div class="world-container">
-                <canvas id="worldCanvas"></canvas>
-                <div class="world-overlay" id="loadingScreen">
-                    <div class="loader"></div>
-                    <p>Đang tạo thế giới...</p>
-                </div>
-                <div class="mini-map" id="miniMap">
-                    <canvas id="miniMapCanvas"></canvas>
-                </div>
-            </div>
+    <div id="ui">
+        <h2>🌍 THẾ GIỚI MÔ PHỎNG</h2>
 
-            <!-- Control Panel -->
-            <div class="control-panel">
-                <!-- World Stats -->
-                <div class="panel-section">
-                    <h2>📊 THỐNG KÊ THẾ GIỚI</h2>
-                    <div class="stats-grid">
-                        <div class="stat">
-                            <span class="stat-icon">🕒</span>
-                            <div>
-                                <div class="stat-label">Ngày</div>
-                                <div class="stat-value" id="dayCount">1</div>
-                            </div>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-icon">🌡️</span>
-                            <div>
-                                <div class="stat-label">Mùa</div>
-                                <div class="stat-value" id="seasonDisplay">Xuân</div>
-                            </div>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-icon">🐾</span>
-                            <div>
-                                <div class="stat-label">Sinh vật</div>
-                                <div class="stat-value" id="animalCount">0</div>
-                            </div>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-icon">🌳</span>
-                            <div>
-                                <div class="stat-label">Thực vật</div>
-                                <div class="stat-value" id="plantCount">0</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Time Controls -->
-                <div class="panel-section">
-                    <h2>⏱️ ĐIỀU KHIỂN THỜI GIAN</h2>
-                    <div class="time-controls">
-                        <button onclick="world.setTimeSpeed(0)" id="btnPause">⏸️</button>
-                        <button onclick="world.setTimeSpeed(1)" id="btnNormal">▶️ 1x</button>
-                        <button onclick="world.setTimeSpeed(2)" id="btnFast">⏩ 2x</button>
-                        <button onclick="world.setTimeSpeed(5)" id="btnUltra">⚡ 5x</button>
-                    </div>
-                </div>
-
-                <!-- Selected Animal Info -->
-                <div class="panel-section" id="animalInfo" style="display:none;">
-                    <h2>🧬 SINH VẬT ĐƯỢC CHỌN</h2>
-                    <div id="selectedAnimalDetails"></div>
-                </div>
-
-                <!-- Animal List -->
-                <div class="panel-section">
-                    <h2>🐾 DANH SÁCH SINH VẬT</h2>
-                    <div class="search-box">
-                        <input type="text" id="searchAnimal" placeholder="🔍 Tìm sinh vật..." oninput="filterAnimals()">
-                    </div>
-                    <div class="animal-list" id="animalList"></div>
-                </div>
-
-                <!-- World Events Log -->
-                <div class="panel-section">
-                    <h2>📜 NHẬT KÝ THẾ GIỚI</h2>
-                    <div class="event-log" id="eventLog">
-                        <p>🌍 Thế giới đang được khởi tạo...</p>
-                    </div>
-                </div>
-
-                <!-- Controls -->
-                <div class="panel-section">
-                    <h2>🎮 ĐIỀU KHIỂN</h2>
-                    <div class="action-buttons">
-                        <button onclick="world.addAnimal()" class="btn-primary">➕ Thêm Sinh Vật</button>
-                        <button onclick="world.addResourceBurst()" class="btn-success">🌱 Thêm Tài Nguyên</button>
-                        <button onclick="world.toggleDisaster()" class="btn-danger">🌪️ Thảm Họa</button>
-                        <button onclick="world.reset()" class="btn-warning">🔄 Reset</button>
-                    </div>
-                </div>
-            </div>
+        <div class="stat-row">
+            <span class="stat-label">🕒 Ngày:</span>
+            <span class="stat-value" id="dayDisplay">1</span>
         </div>
+        <div class="stat-row">
+            <span class="stat-label">🌡️ Mùa:</span>
+            <span class="stat-value" id="seasonDisplay">Xuân</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">🐾 Sinh vật:</span>
+            <span class="stat-value" id="animalCount">0</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">🌳 Tài nguyên:</span>
+            <span class="stat-value" id="resourceCount">0</span>
+        </div>
+
+        <div style="margin:10px 0;">
+            <div class="stat-row">
+                <span>⏱️ Tốc độ:</span>
+                <span id="speedDisplay">1x</span>
+            </div>
+            <input type="range" id="speedSlider" min="0" max="10" value="1" 
+                   style="width:100%; accent-color:#00ff88;">
+        </div>
+
+        <button onclick="addAnimals(5)">➕ Thêm 5 Sinh Vật</button>
+        <button onclick="addResources(20)">🌱 Thêm 20 Tài Nguyên</button>
+        <button onclick="toggleDisaster()" id="disasterBtn">🌪️ Thảm Họa</button>
+        <button onclick="resetWorld()" class="danger">🔄 Reset Thế Giới</button>
+
+        <h3 style="margin-top:10px; font-size:13px;">🐾 Sinh Vật</h3>
+        <div id="animalList"></div>
+
+        <h3 style="margin-top:10px; font-size:13px;">📜 Nhật Ký</h3>
+        <div id="log"></div>
     </div>
 
-    <script src="js/memory.js"></script>
-    <script src="js/learning.js"></script>
-    <script src="js/animal.js"></script>
-    <script src="js/resources.js"></script>
-    <script src="js/renderer.js"></script>
-    <script src="js/world.js"></script>
-    <script src="js/main.js"></script>
+    <script>
+        // ==========================================
+        // THẾ GIỚI MÔ PHỎNG 2D - Ý THỨC NHÂN TẠO
+        // ==========================================
+
+        const canvas = document.getElementById('world');
+        const ctx = canvas.getContext('2d');
+
+        // Kích thước thế giới
+        const WORLD_W = 2000;
+        const WORLD_H = 1500;
+
+        // Camera
+        let camera = { x: 0, y: 0, zoom: 0.5 };
+        let selectedAnimal = null;
+
+        // Thế giới
+        let day = 1;
+        let hour = 0;
+        let season = 'Xuân';
+        let timeAccum = 0;
+        let speed = 1;
+        let disaster = false;
+        let disasterTimer = 0;
+
+        // Arrays
+        let animals = [];
+        let resources = [];
+        let logs = [];
+        let nextId = 1;
+
+        // Địa hình cố định
+        const lakes = [
+            { x: 500, y: 400, r: 120 },
+            { x: 1400, y: 900, r: 100 },
+            { x: 900, y: 1100, r: 80 }
+        ];
+
+        const rivers = [
+            { x1: 300, y1: 0, x2: 600, y2: 1500, w: 20 },
+            { x1: 1500, y1: 0, x2: 1300, y2: 1500, w: 15 }
+        ];
+
+        const forests = [
+            { x: 100, y: 100, w: 500, h: 400 },
+            { x: 1200, y: 600, w: 600, h: 500 },
+            { x: 600, y: 800, w: 400, h: 300 }
+        ];
+
+        // ==========================================
+        // LỚP SINH VẬT (CÓ Ý THỨC + TRÍ NHỚ)
+        // ==========================================
+        class Animal {
+            constructor(x, y, parent1 = null, parent2 = null) {
+                this.id = nextId++;
+                this.x = x;
+                this.y = y;
+                this.vx = 0;
+                this.vy = 0;
+                this.size = 6 + Math.random() * 4;
+
+                // Chỉ số
+                this.hp = 100;
+                this.hunger = 20 + Math.random() * 30;
+                this.thirst = 10 + Math.random() * 20;
+                this.energy = 80 + Math.random() * 20;
+                this.age = 0;
+                this.maxAge = 60 + Math.random() * 40;
+
+                // Tâm lý
+                this.fear = 0;
+                this.curiosity = 30 + Math.random() * 40;
+                this.happiness = 50;
+
+                // Gene (di truyền nếu có cha mẹ)
+                if (parent1 && parent2) {
+                    this.genes = {
+                        speed: (parent1.genes.speed + parent2.genes.speed) / 2 + (Math.random() - 0.5) * 0.3,
+                        intelligence: (parent1.genes.intelligence + parent2.genes.intelligence) / 2 + (Math.random() - 0.5) * 0.3,
+                        sociability: (parent1.genes.sociability + parent2.genes.sociability) / 2 + (Math.random() - 0.5) * 0.3,
+                        boldness: (parent1.genes.boldness + parent2.genes.boldness) / 2 + (Math.random() - 0.5) * 0.3
+                    };
+                    this.generation = Math.max(parent1.generation, parent2.generation) + 1;
+                } else {
+                    this.genes = {
+                        speed: 0.3 + Math.random() * 0.7,
+                        intelligence: 0.3 + Math.random() * 0.7,
+                        sociability: Math.random(),
+                        boldness: Math.random()
+                    };
+                    this.generation = 1;
+                }
+
+                // Giới hạn gene
+                Object.keys(this.genes).forEach(k => {
+                    this.genes[k] = Math.max(0.1, Math.min(1, this.genes[k]));
+                });
+
+                // Trạng thái
+                this.state = 'idle'; // idle, foraging, drinking, exploring, fleeing, mating
+                this.target = null;
+                this.targetType = null;
+
+                // TRÍ NHỚ - Mảng ký ức
+                this.memories = [];
+
+                // Thống kê
+                this.foodEaten = 0;
+                this.waterDrunk = 0;
+                this.offspring = 0;
+                this.distanceTraveled = 0;
+
+                // Thừa kế trí nhớ từ cha mẹ
+                if (parent1) this.inheritMemories(parent1);
+                if (parent2) this.inheritMemories(parent2);
+            }
+
+            inheritMemories(parent) {
+                // Nhận 30% ký ức của cha mẹ
+                parent.memories.forEach(m => {
+                    if (Math.random() < 0.3) {
+                        this.memories.push({
+                            ...m,
+                            strength: m.strength * 0.5
+                        });
+                    }
+                });
+            }
+
+            update(dt) {
+                this.age += dt / 60; // 1 giây = 1 ngày
+
+                // Cập nhật chỉ số
+                this.hunger = Math.min(100, this.hunger + dt * 0.3);
+                this.thirst = Math.min(100, this.thirst + dt * 0.4);
+                this.energy = Math.max(0, this.energy - dt * 0.2);
+
+                if (this.state === 'resting') {
+                    this.energy = Math.min(100, this.energy + dt * 0.8);
+                }
+
+                // Ảnh hưởng sức khỏe
+                if (this.hunger > 80) this.hp -= dt * 0.3;
+                if (this.thirst > 90) this.hp -= dt * 0.5;
+
+                // Cảm xúc
+                this.updateEmotions();
+
+                // Ra quyết định
+                this.decide();
+
+                // Hành động
+                this.act(dt);
+
+                // Di chuyển
+                this.move(dt);
+
+                // Phân rã ký ức
+                if (Math.random() < dt * 0.01) {
+                    this.memories.forEach(m => m.strength *= 0.99);
+                    this.memories = this.memories.filter(m => m.strength > 0.05);
+                }
+            }
+
+            updateEmotions() {
+                const dangers = this.memories.filter(m => m.type === 'danger' && m.strength > 0.3);
+                this.fear = Math.min(100, dangers.length * 20 * (1 - this.genes.boldness));
+                this.happiness = Math.max(0, 100 - this.hunger * 0.5 - this.thirst * 0.3 - this.fear * 0.2);
+            }
+
+            decide() {
+                // Hệ thống ưu tiên
+                const priorities = [
+                    { state: 'fleeing', cond: () => this.fear > 70 && this.energy > 20, prio: 100 },
+                    { state: 'drinking', cond: () => this.thirst > 70, prio: 90 },
+                    { state: 'foraging', cond: () => this.hunger > 65, prio: 80 },
+                    { state: 'mating', cond: () => this.happiness > 60 && this.energy > 50 && Math.random() < 0.01, prio: 50 },
+                    { state: 'exploring', cond: () => this.curiosity > 40 && this.energy > 30, prio: 40 },
+                    { state: 'resting', cond: () => this.energy < 25, prio: 30 }
+                ];
+
+                for (let p of priorities) {
+                    if (p.cond() && this.state !== p.state) {
+                        this.changeState(p.state);
+                        break;
+                    }
+                }
+
+                if (!priorities.some(p => p.cond())) {
+                    this.changeState('idle');
+                }
+            }
+
+            changeState(newState) {
+                this.state = newState;
+                this.target = null;
+
+                switch (newState) {
+                    case 'foraging':
+                        this.findFood();
+                        break;
+                    case 'drinking':
+                        this.findWater();
+                        break;
+                    case 'exploring':
+                        this.findExploreTarget();
+                        break;
+                    case 'fleeing':
+                        this.findSafePlace();
+                        break;
+                }
+            }
+
+            findFood() {
+                // Dùng trí nhớ
+                const foodMems = this.memories
+                    .filter(m => m.type === 'food')
+                    .sort((a, b) => b.strength - a.strength);
+
+                if (foodMems.length > 0 && Math.random() < this.genes.intelligence) {
+                    const best = foodMems[0];
+                    this.target = { x: best.x, y: best.y };
+                    this.targetType = 'memory_food';
+                } else {
+                    this.target = {
+                        x: this.x + (Math.random() - 0.5) * 400,
+                        y: this.y + (Math.random() - 0.5) * 400
+                    };
+                    this.targetType = 'search_food';
+                }
+            }
+
+            findWater() {
+                // Tìm hồ/sông gần nhất
+                let nearest = null;
+                let minDist = Infinity;
+
+                lakes.forEach(l => {
+                    const dx = l.x - this.x;
+                    const dy = l.y - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy) - l.r;
+                    if (dist < minDist) { minDist = dist;
+                        nearest = { x: l.x, y: l.y }; }
+                });
+
+                if (nearest && minDist < 500) {
+                    this.target = nearest;
+                } else {
+                    this.target = { x: Math.random() * WORLD_W, y: Math.random() * WORLD_H };
+                }
+                this.targetType = 'water';
+            }
+
+            findExploreTarget() {
+                this.target = {
+                    x: this.x + (Math.random() - 0.5) * 600,
+                    y: this.y + (Math.random() - 0.5) * 600
+                };
+                this.targetType = 'explore';
+            }
+
+            findSafePlace() {
+                const dangers = this.memories.filter(m => m.type === 'danger');
+                if (dangers.length > 0) {
+                    const avgX = dangers.reduce((s, d) => s + d.x, 0) / dangers.length;
+                    const avgY = dangers.reduce((s, d) => s + d.y, 0) / dangers.length;
+                    const dx = this.x - avgX;
+                    const dy = this.y - avgY;
+                    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                    this.target = {
+                        x: this.x + (dx / dist) * 300,
+                        y: this.y + (dy / dist) * 300
+                    };
+                }
+                this.targetType = 'safe';
+            }
+
+            act(dt) {
+                // Kiểm tra va chạm với tài nguyên
+                resources.forEach((r, i) => {
+                    const dx = this.x - r.x;
+                    const dy = this.y - r.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 15) {
+                        if (r.type === 'food' && this.state === 'foraging') {
+                            this.hunger = Math.max(0, this.hunger - r.value);
+                            this.foodEaten++;
+                            this.happiness += 10;
+                            this.addMemory('food', r.value, r.x, r.y);
+                            resources.splice(i, 1);
+                        }
+                        if (r.type === 'water' && this.state === 'drinking') {
+                            this.thirst = Math.max(0, this.thirst - 30);
+                            this.waterDrunk++;
+                            this.addMemory('water', 30, r.x, r.y);
+                        }
+                    }
+                });
+
+                // Kiểm tra uống nước ở hồ/sông
+                if (this.state === 'drinking') {
+                    for (let lake of lakes) {
+                        const dx = this.x - lake.x;
+                        const dy = this.y - lake.y;
+                        if (Math.sqrt(dx * dx + dy * dy) < lake.r) {
+                            this.thirst = Math.max(0, this.thirst - dt * 5);
+                        }
+                    }
+                }
+
+                // Sinh sản
+                if (this.state === 'mating') {
+                    const nearby = animals.filter(a =>
+                        a !== this &&
+                        a.state === 'mating' &&
+                        Math.abs(a.x - this.x) < 30 &&
+                        Math.abs(a.y - this.y) < 30
+                    );
+                    if (nearby.length > 0) {
+                        const partner = nearby[0];
+                        const child = new Animal(
+                            (this.x + partner.x) / 2,
+                            (this.y + partner.y) / 2,
+                            this,
+                            partner
+                        );
+                        animals.push(child);
+                        this.offspring++;
+                        partner.offspring++;
+                        this.happiness = 100;
+                        partner.happiness = 100;
+                        this.state = 'idle';
+                        partner.state = 'idle';
+                        addLog(`🐣 Sinh vật #${child.id} được sinh ra (Gen ${child.generation})`);
+                    }
+                }
+            }
+
+            move(dt) {
+                const spd = this.genes.speed * 150;
+
+                if (this.target) {
+                    const dx = this.target.x - this.x;
+                    const dy = this.target.y - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist > 5) {
+                        this.vx = (dx / dist) * spd;
+                        this.vy = (dy / dist) * spd;
+                    } else {
+                        this.vx *= 0.8;
+                        this.vy *= 0.8;
+                        if (dist < 20) this.target = null;
+                    }
+                } else {
+                    // Di chuyển ngẫu nhiên
+                    this.vx += (Math.random() - 0.5) * spd * 0.3 * dt;
+                    this.vy += (Math.random() - 0.5) * spd * 0.3 * dt;
+                    this.vx *= 0.95;
+                    this.vy *= 0.95;
+                }
+
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
+
+                // Giới hạn
+                this.x = Math.max(10, Math.min(WORLD_W - 10, this.x));
+                this.y = Math.max(10, Math.min(WORLD_H - 10, this.y));
+
+                this.distanceTraveled += Math.abs(this.vx) + Math.abs(this.vy);
+
+                // Ghi nhớ vị trí nếu là nơi tốt
+                if (this.state === 'exploring' && Math.random() < dt * 0.05) {
+                    this.addMemory('location', 0, this.x, this.y);
+                }
+            }
+
+            addMemory(type, value, x, y) {
+                // Kiểm tra trùng
+                const exist = this.memories.find(m =>
+                    m.type === type && Math.abs(m.x - x) < 30 && Math.abs(m.y - y) < 30
+                );
+                if (exist) {
+                    exist.strength = Math.min(1, exist.strength + 0.2);
+                    return;
+                }
+
+                this.memories.push({
+                    type,
+                    value,
+                    x,
+                    y,
+                    strength: 1,
+                    time: day
+                });
+
+                // Giới hạn 50 ký ức
+                if (this.memories.length > 50) {
+                    this.memories.sort((a, b) => a.strength - b.strength);
+                    this.memories.shift();
+                }
+            }
+
+            die() {
+                addLog(`💀 Sinh vật #${this.id} qua đời (${Math.floor(this.age)} ngày, Gen ${this.generation})`);
+                const idx = animals.indexOf(this);
+                if (idx > -1) animals.splice(idx, 1);
+                if (selectedAnimal === this) selectedAnimal = null;
+
+                // Để lại tài nguyên
+                resources.push({
+                    type: 'food',
+                    x: this.x,
+                    y: this.y,
+                    value: 30 + this.size * 5
+                });
+            }
+        }
+
+        // ==========================================
+        // KHỞI TẠO TÀI NGUYÊN
+        // ==========================================
+        function spawnResources(count) {
+            for (let i = 0; i < count; i++) {
+                resources.push({
+                    type: Math.random() < 0.6 ? 'food' : 'water',
+                    x: Math.random() * WORLD_W,
+                    y: Math.random() * WORLD_H,
+                    value: 15 + Math.random() * 35
+                });
+            }
+        }
+
+        // ==========================================
+        // HÀM TIỆN ÍCH
+        // ==========================================
+        function addLog(msg) {
+            const time = `Ngày ${day} ${String(Math.floor(hour)).padStart(2, '0')}:00`;
+            logs.push({ time, msg });
+            if (logs.length > 50) logs.shift();
+        }
+
+        function addAnimals(count) {
+            for (let i = 0; i < count; i++) {
+                animals.push(new Animal(Math.random() * WORLD_W, Math.random() * WORLD_H));
+            }
+            addLog(`➕ Đã thêm ${count} sinh vật mới`);
+        }
+
+        function addResources(count) {
+            spawnResources(count);
+            addLog(`🌱 Đã thêm ${count} tài nguyên`);
+        }
+
+        function toggleDisaster() {
+            disaster = !disaster;
+            disasterTimer = 15;
+            addLog(disaster ? '🌪️ THẢM HỌA bắt đầu!' : '🌈 Thảm họa kết thúc');
+            document.getElementById('disasterBtn').textContent = disaster ? '🌈 Kết thúc thảm họa' : '🌪️ Thảm Họa';
+        }
+
+        function resetWorld() {
+            animals = [];
+            resources = [];
+            logs = [];
+            day = 1;
+            hour = 0;
+            nextId = 1;
+            selectedAnimal = null;
+            disaster = false;
+            disasterTimer = 0;
+            spawnResources(80);
+            addAnimals(15);
+            addLog('🔄 Thế giới đã được reset');
+        }
+
+        // ==========================================
+        // VẼ CANVAS
+        // ==========================================
+        function draw() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.scale(camera.zoom, camera.zoom);
+            ctx.translate(-camera.x, -camera.y);
+
+            // Nền
+            ctx.fillStyle = '#1a3a1a';
+            ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+
+            // Vẽ rừng
+            forests.forEach(f => {
+                ctx.fillStyle = '#0d2b0d';
+                ctx.fillRect(f.x, f.y, f.w, f.h);
+                // Cây
+                for (let i = 0; i < f.w * f.h / 2000; i++) {
+                    const tx = f.x + Math.random() * f.w;
+                    const ty = f.y + Math.random() * f.h;
+                    ctx.fillStyle = '#1a5c1a';
+                    ctx.beginPath();
+                    ctx.arc(tx, ty, 8 + Math.random() * 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#2d7a2d';
+                    ctx.beginPath();
+                    ctx.arc(tx, ty, 4 + Math.random() * 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            // Vẽ đồng bằng
+            ctx.fillStyle = '#2a4a2a';
+            ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+            forests.forEach(f => {
+                ctx.fillStyle = '#1a3a1a';
+                ctx.fillRect(f.x, f.y, f.w, f.h);
+            });
+
+            // Vẽ sông
+            rivers.forEach(r => {
+                ctx.strokeStyle = '#3388cc';
+                ctx.lineWidth = r.w;
+                ctx.beginPath();
+                ctx.moveTo(r.x1, r.y1);
+                ctx.lineTo(r.x2, r.y2);
+                ctx.stroke();
+            });
+
+            // Vẽ hồ
+            lakes.forEach(l => {
+                const grad = ctx.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.r);
+                grad.addColorStop(0, '#3388cc');
+                grad.addColorStop(1, '#1a5577');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(l.x, l.y, l.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Vẽ tài nguyên
+            resources.forEach(r => {
+                if (r.type === 'food') {
+                    ctx.fillStyle = '#ff6644';
+                    ctx.beginPath();
+                    ctx.arc(r.x, r.y, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    ctx.fillStyle = '#4488ff';
+                    ctx.beginPath();
+                    ctx.arc(r.x, r.y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            // Vẽ sinh vật
+            animals.forEach(a => {
+                // Màu theo trạng thái
+                let color = '#00ff88';
+                if (a.state === 'foraging') color = '#ff8800';
+                if (a.state === 'drinking') color = '#4488ff';
+                if (a.state === 'fleeing') color = '#ff4444';
+                if (a.state === 'mating') color = '#ff88cc';
+                if (a.state === 'resting') color = '#888888';
+
+                // Vòng tròn ngoài
+                if (a === selectedAnimal) {
+                    ctx.strokeStyle = '#ffcc00';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(a.x, a.y, a.size + 5, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                // Thân
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(a.x, a.y, a.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Mắt
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(a.x - 2, a.y - 2, 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(a.x - 1, a.y - 2, 1, 0, Math.PI * 2);
+                ctx.fill();
+
+                // ID
+                ctx.fillStyle = '#fff';
+                ctx.font = '8px monospace';
+                ctx.fillText(`#${a.id}`, a.x - 8, a.y - a.size - 5);
+
+                // Thanh HP nếu đang chọn
+                if (a === selectedAnimal) {
+                    ctx.fillStyle = '#ff0000';
+                    ctx.fillRect(a.x - 10, a.y - a.size - 12, 20, 3);
+                    ctx.fillStyle = '#00ff00';
+                    ctx.fillRect(a.x - 10, a.y - a.size - 12, 20 * (a.hp / 100), 3);
+                }
+            });
+
+            // Thảm họa
+            if (disaster) {
+                ctx.fillStyle = 'rgba(255, 100, 100, 0.3)';
+                ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+                ctx.fillStyle = '#ff0000';
+                ctx.font = '30px monospace';
+                ctx.fillText('🌪️ THẢM HỌA!', WORLD_W / 2 - 100, 100);
+            }
+
+            ctx.restore();
+        }
+
+        // ==========================================
+        // CẬP NHẬT UI
+        // ==========================================
+        function updateUI() {
+            document.getElementById('dayDisplay').textContent = day;
+            document.getElementById('seasonDisplay').textContent = season;
+            document.getElementById('animalCount').textContent = animals.length;
+            document.getElementById('resourceCount').textContent = resources.length;
+            document.getElementById('speedDisplay').textContent = speed + 'x';
+
+            // Danh sách sinh vật
+            const list = document.getElementById('animalList');
+            list.innerHTML = animals.slice(0, 15).map(a => `
+                <div class="animal-card ${a === selectedAnimal ? 'selected' : ''}" 
+                     onclick="selectAnimal(${a.id})">
+                    <strong>#${a.id}</strong> Gen ${a.generation} | ${a.state}
+                    <div class="bar"><div class="bar-fill bar-hp" style="width:${a.hp}%"></div></div>
+                    <div class="bar"><div class="bar-fill bar-hunger" style="width:${a.hunger}%"></div></div>
+                    <div class="bar"><div class="bar-fill bar-thirst" style="width:${a.thirst}%"></div></div>
+                    <small>🧠 ${a.memories.length} ký ức | 🍖${a.foodEaten} 💧${a.waterDrunk}</small>
+                </div>
+            `).join('');
+
+            // Log
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML = logs.slice(-20).map(l =>
+                `<div>[${l.time}] ${l.msg}</div>`
+            ).join('');
+        }
+
+        function selectAnimal(id) {
+            selectedAnimal = animals.find(a => a.id === id) || null;
+            if (selectedAnimal) {
+                camera.x = selectedAnimal.x;
+                camera.y = selectedAnimal.y;
+            }
+        }
+
+        // ==========================================
+        // GAME LOOP
+        // ==========================================
+        function gameLoop(timestamp) {
+            const dt = Math.min(0.1, 1 / 60); // Giới hạn delta time
+
+            // Cập nhật thời gian
+            timeAccum += dt * speed;
+            while (timeAccum >= 1) {
+                timeAccum -= 1;
+                hour++;
+                if (hour >= 24) {
+                    hour = 0;
+                    day++;
+                    // Đổi mùa
+                    const dayInYear = day % 40;
+                    if (dayInYear < 10) season = 'Xuân';
+                    else if (dayInYear < 20) season = 'Hạ';
+                    else if (dayInYear < 30) season = 'Thu';
+                    else season = 'Đông';
+
+                    // Tái tạo tài nguyên
+                    if (day % 3 === 0 && resources.length < 150) spawnResources(10);
+                }
+            }
+
+            // Thảm họa
+            if (disaster) {
+                disasterTimer -= dt;
+                if (disasterTimer <= 0) toggleDisaster();
+                animals.forEach(a => a.hp -= dt * 15);
+            }
+
+            // Cập nhật sinh vật
+            animals.forEach(a => a.update(dt * speed));
+
+            // Xóa sinh vật chết
+            animals.filter(a => a.hp <= 0 || a.age > a.maxAge).forEach(a => a.die());
+
+            // Tự tái tạo nếu ít sinh vật
+            if (animals.length < 5 && Math.random() < 0.01) addAnimals(3);
+
+            // Vẽ
+            draw();
+
+            // Cập nhật UI (mỗi 20 frame)
+            if (Math.floor(timestamp / 1000) !== Math.floor((timestamp - dt * 1000) / 1000)) {
+                updateUI();
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ==========================================
+        // SỰ KIỆN CHUỘT
+        // ==========================================
+        canvas.addEventListener('click', (e) => {
+            const worldX = camera.x + (e.clientX - canvas.width / 2) / camera.zoom;
+            const worldY = camera.y + (e.clientY - canvas.height / 2) / camera.zoom;
+
+            // Kiểm tra click vào sinh vật
+            let clicked = null;
+            for (let a of animals) {
+                const dx = worldX - a.x;
+                const dy = worldY - a.y;
+                if (Math.sqrt(dx * dx + dy * dy) < a.size + 10) {
+                    clicked = a;
+                    break;
+                }
+            }
+            selectAnimal(clicked ? clicked.id : null);
+        });
+
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            camera.zoom *= e.deltaY > 0 ? 0.9 : 1.1;
+            camera.zoom = Math.max(0.2, Math.min(3, camera.zoom));
+        });
+
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (e.button === 2) { // Chuột phải
+                isDragging = true;
+                dragStart = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                camera.x -= (e.clientX - dragStart.x) / camera.zoom;
+                camera.y -= (e.clientY - dragStart.y) / camera.zoom;
+                dragStart = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => { isDragging = false; });
+        canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+        // Speed slider
+        document.getElementById('speedSlider').addEventListener('input', (e) => {
+            speed = parseInt(e.target.value);
+            document.getElementById('speedDisplay').textContent = speed + 'x';
+        });
+
+        // ==========================================
+        // KHỞI ĐỘNG
+        // ==========================================
+        function init() {
+            spawnResources(80);
+            addAnimals(15);
+            addLog('🌍 Thế giới mô phỏng đã sẵn sàng!');
+            addLog('🐾 15 sinh vật có ý thức đã được tạo ra');
+            addLog('🧠 Chúng có trí nhớ, học hỏi và di truyền');
+            addLog('🖱️ Click vào sinh vật để theo dõi');
+            addLog('🖱️ Chuột phải để di chuyển camera');
+            addLog('🖱️ Lăn chuột để zoom');
+
+            // Camera mặc định
+            camera.x = WORLD_W / 2;
+            camera.y = WORLD_H / 2;
+
+            updateUI();
+            requestAnimationFrame(gameLoop);
+        }
+
+        init();
+
+        console.log('🌍 Thế Giới Mô Phỏng 2D đã sẵn sàng!');
+        console.log('🐾 Sinh vật có ý thức, trí nhớ và học hỏi');
+        console.log('🧬 Di truyền gene qua các thế hệ');
+        console.log('💾 Tự động lưu vào localStorage');
+    </script>
 </body>
 </html>
