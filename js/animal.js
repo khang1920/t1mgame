@@ -239,3 +239,219 @@ class Animal {
             };
             
             const dx = this.x - avgDanger.x;
+            const dy = this.y - avgDanger.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            this.target = {
+                x: this.x + (dx / dist) * 200,
+                y: this.y + (dy / dist) * 200
+            };
+            this.targetType = 'safe_place';
+        }
+    }
+
+    findMate() {
+        // Tìm bạn tình gần nhất
+        const nearbyAnimals = this.world.getNearbyAnimals(this, 100);
+        const potentialMates = nearbyAnimals.filter(a => 
+            a !== this && 
+            Math.abs(a.age - this.age) < 10 &&
+            a.health > 50 &&
+            a.state !== 'fleeing'
+        );
+        
+        if (potentialMates.length > 0) {
+            const mate = potentialMates[Math.floor(Math.random() * potentialMates.length)];
+            this.target = { x: mate.x, y: mate.y };
+            this.targetType = 'mate';
+        }
+    }
+
+    executeAction(deltaTime) {
+        if (!this.target) return;
+        
+        const dx = this.target.x - this.x;
+        const dy = this.target.y - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        if (dist < 10) {
+            // Đến nơi
+            this.performAction();
+            this.target = null;
+        }
+    }
+
+    performAction() {
+        switch (this.state) {
+            case 'foraging':
+                this.eat();
+                break;
+            case 'drinking':
+                this.drink();
+                break;
+            case 'exploring':
+                this.learn();
+                break;
+            case 'mating':
+                this.mate();
+                break;
+        }
+    }
+
+    eat() {
+        // Kiểm tra có thức ăn tại vị trí không
+        const food = this.world.getResourceAt(this.x, this.y, 'food');
+        if (food) {
+            const foodValue = food.value;
+            this.hunger = Math.max(0, this.hunger - foodValue * 0.5);
+            this.stats.foodEaten++;
+            
+            // Học hỏi
+            this.memory.addMemory('food', foodValue, { x: this.x, y: this.y }, {
+                type: food.type,
+                season: this.world.season
+            });
+            
+            this.learning.learn({
+                action: 'find_food',
+                result: { success: true, reward: foodValue },
+                context: 'foraging'
+            });
+            
+            // Tiêu thụ tài nguyên
+            this.world.consumeResource(food);
+        }
+    }
+
+    drink() {
+        const water = this.world.getResourceAt(this.x, this.y, 'water');
+        if (water) {
+            this.thirst = Math.max(0, this.thirst - 30);
+            this.stats.waterDrunk++;
+            
+            this.memory.addMemory('water', 30, { x: this.x, y: this.y });
+        }
+    }
+
+    learn() {
+        // Học về môi trường xung quanh
+        this.memory.addMemory('location', 0, { x: this.x, y: this.y });
+        
+        // Tăng kỹ năng navigation
+        this.learning.skills.navigation += 0.01;
+        
+        // Học từ các sinh vật gần đó
+        const nearby = this.world.getNearbyAnimals(this, 50);
+        nearby.forEach(other => {
+            if (Math.random() < this.personality.intelligence * 0.5) {
+                this.memory.learnFromOthers(other.memory.memories, 0.3);
+            }
+        });
+    }
+
+    mate() {
+        const mate = this.world.getNearestAnimal(this, 20);
+        if (mate && mate !== this && mate.state === 'mating') {
+            // Sinh sản
+            this.world.createOffspring(this, mate);
+            this.stats.offspringCount++;
+            this.socialNeed = 0;
+            this.happiness = 100;
+            
+            // Ghi nhớ bạn tình
+            this.memory.addMemory('mate', mate.id, { x: mate.x, y: mate.y });
+            this.relationships.set(mate.id, {
+                type: 'mate',
+                strength: 0.8,
+                lastInteraction: this.world.currentDay
+            });
+        }
+    }
+
+    move(deltaTime) {
+        if (!this.target) {
+            // Di chuyển ngẫu nhiên khi không có mục tiêu
+            this.direction += (Math.random() - 0.5) * 0.5;
+            this.vx = Math.cos(this.direction) * this.speed * 0.3;
+            this.vy = Math.sin(this.direction) * this.speed * 0.3;
+        } else {
+            const dx = this.target.x - this.x;
+            const dy = this.target.y - this.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist > 0) {
+                this.direction = Math.atan2(dy, dx);
+                this.vx = (dx / dist) * this.speed;
+                this.vy = (dy / dist) * this.speed;
+            }
+        }
+        
+        // Cập nhật vị trí
+        this.x += this.vx * deltaTime * 60;
+        this.y += this.vy * deltaTime * 60;
+        
+        // Giới hạn trong thế giới
+        this.x = Math.max(0, Math.min(this.world.width, this.x));
+        this.y = Math.max(0, Math.min(this.world.height, this.y));
+        
+        this.stats.distanceTraveled += Math.abs(this.vx) + Math.abs(this.vy);
+    }
+
+    shouldDie() {
+        return this.health <= 0 || 
+               this.age > this.maxAge || 
+               this.hunger >= 100 || 
+               this.thirst >= 100;
+    }
+
+    die() {
+        // Trước khi chết, để lại "di sản" kiến thức cho con cháu
+        if (this.offspring.length > 0) {
+            this.offspring.forEach(childId => {
+                const child = this.world.getAnimalById(childId);
+                if (child) {
+                    child.memory.learnFromOthers(this.memory.memories, 0.5);
+                }
+            });
+        }
+        
+        // Thêm vào sự kiện thế giới
+        this.world.addEvent(`${this.getName()} đã qua đời ở tuổi ${Math.floor(this.age)} ngày`);
+        
+        // Xóa khỏi thế giới
+        this.world.removeAnimal(this);
+    }
+
+    getRandomPosition() {
+        return {
+            x: Math.random() * this.world.width,
+            y: Math.random() * this.world.height
+        };
+    }
+
+    getName() {
+        return `Sinh vật #${this.id}`;
+    }
+
+    // Xuất dữ liệu để lưu game
+    exportData() {
+        return {
+            id: this.id,
+            x: this.x,
+            y: this.y,
+            health: this.health,
+            hunger: this.hunger,
+            thirst: this.thirst,
+            energy: this.energy,
+            age: this.age,
+            personality: this.personality,
+            state: this.state,
+            stats: this.stats,
+            generation: this.generation,
+            memories: this.memory.exportMemories(),
+            knowledge: this.learning.exportKnowledge()
+        };
+    }
+}
+
+window.Animal = Animal;
